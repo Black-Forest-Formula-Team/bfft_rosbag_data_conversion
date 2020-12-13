@@ -1,0 +1,107 @@
+#! /usr/bin/env python
+
+##
+#  * @file rosbag_to_db.py
+#  * @brief This file is used for extracting ROSBAGS and
+#  * writing the data to a SQLite3 Database
+#  * @authors Alex Sperka
+#  * @date 13.12.2020
+#  * */
+
+import sqlite3
+
+import rospy
+from adma_connect.msg import *
+from std_msgs.msg import String
+
+import pandas
+import rosbag_pandas
+
+def callback(data):
+    rospy.loginfo(rospy.get_caller_id() + "I heard ID: %s, AccBodyX: %s, AccBodyY: %s, AccBodyZ: %s, GPSReceiverError: %s, GPSReceiverStatus: %s", data.GeneSysID, data.AccBodyX, data.AccBodyY, data.AccBodyZ, data.GPSReceiverError, data.GPSReceiverStatus)
+
+    conn = sqlite3.connect(path)
+    c = conn.cursor()
+
+    # Insert a row of data
+    c.execute('INSERT INTO test_admadata VALUES (?,?);', (data.GeneSysID, data.HeaderVersion))
+    # Save (commit) the changes
+    conn.commit()
+
+    # We can also close the connection if we are done with it.
+    # Just be sure any changes have been committed or they will be lost.
+    conn.close()
+
+def create_small_table_sqlite3():
+        # Create table
+    c.execute('''CREATE TABLE test_admadata (
+        'GeneSysID' TEXT,
+        'HeaderVersion' TEXT
+        );'''
+    )
+    conn.close()
+
+    return()
+
+
+#path = '../rosbag_to_sqlite3.db'
+db_path = '/SSD_512/sqlite3_DB/'        ## Format '/SSD_512/sqlite3_DB/' 
+db_name = 'bfft_sqlite3.db'               ## Format 'adma_table.db' 
+db_table = 'adma_test'                  ## Format 'adma_test' 
+
+rb_path = '/SSD_512/bagfiles/'          ## Format '/SSD_512/bagfiles/' 
+rb_name = '2020-10-23-15-12-31.bag'     ## Format '2020-12-01-16-40-50.bag'
+
+rospy.init_node('data_to_db')
+rate = rospy.Rate(10)
+
+conn = sqlite3.connect(db_path + db_name)
+
+c = conn.cursor()
+
+rospy.loginfo(rospy.get_caller_id() + "  Connected to SQLite3 DB with path: %s  , table name is: %s", db_path + db_name, db_table)
+
+#create_small_table_sqlite3()
+""" 
+try:
+    # Create table
+    c.execute('''CREATE TABLE stocks
+                (date text, trans text, symbol text, qty real, price real)''')
+    conn.close()  """
+
+""" # Insert a row of data
+#c.execute("INSERT INTO stocks VALUES ('2006-01-05','BUY','RHAT',100,35.14)")
+
+# Save (commit) the changes
+conn.commit()
+
+# We can also close the connection if we are done with it.
+# Just be sure any changes have been committed or they will be lost.
+conn.close()  """
+
+
+data_adma = rosbag_pandas.bag_to_dataframe(rb_path+rb_name, include=['/rosout', '/adma_data'])
+rospy.loginfo(rospy.get_caller_id() + "  Convertion of ROSBAG to Pandas Dataframe done")
+
+#data_adma.to_sql('test_1', conn, method='multi', if_exists='replace')
+data_adma.to_sql(db_table, conn, if_exists='replace')
+
+rospy.loginfo(rospy.get_caller_id() + "  Dataframe to SQLite3 done")
+
+
+# while not rospy.is_shutdown():
+    
+#     rospy.Subscriber('adma_data', Adma, callback)
+    #conn = sqlite3.connect(path)
+    #c = conn.cursor()
+    #print "Hello there"
+    # Insert a row of data
+    #c.execute("INSERT INTO stocks VALUES ('2006-01-05','BUY','RHAT',100,35.14)")
+    #c.execute("INSERT INTO ")
+    # Save (commit) the changes
+    #conn.commit()
+
+    # We can also close the connection if we are done with it.
+    # Just be sure any changes have been committed or they will be lost.
+    #conn.close()
+    #rate.sleep()

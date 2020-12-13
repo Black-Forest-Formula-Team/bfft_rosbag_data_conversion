@@ -1,0 +1,7 @@
+<launch> 
+   <!-- start node -->
+	<node name="conv_rosbag_to_db" type="conv_rosbag_to_db.py" pkg="data_to_db" output="screen" args=""/>
+
+   <!-- <node name="listen_to_channels" type="listen_to_channels.py" pkg="rosbag_to_db" output="screen" args=""/> -->
+
+</launch>

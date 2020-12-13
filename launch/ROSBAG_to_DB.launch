@@ -1,0 +1,18 @@
+<launch>
+	<!-- start node -->
+	<node name="conv_rosbag_to_db" type="conv_rosbag_to_db" pkg="data_to_db" output="screen" args="">
+		<param name="db_path" value="/SSD_512/sqlite3_DB/" />
+		<!--    Format '/SSD_512/sqlite3_DB/'     -->
+		<param name="db_name" value="bfft_sqlite3.db" />
+		<!--    Format 'bfft_sqlite3.db'      -->
+		<param name="db_table" value="adma_test" />
+		<!--    Format 'adma_test'      -->
+		<param name="rb_path" value="/SSD_512/bagfiles/" />
+		<!--    Format '/SSD_512/bagfiles/'       -->
+		<param name="rb_name" value="2020-12-01-16-40-50.bag" />
+		<!--    Format '2020-12-01-16-40-50.bag'      -->
+		<param name="rb_excluded_topics" value='["/camera","/camera/color/camera_info","/camera/color/image_raw","/camera/depth/camera_info","/camera/depth/image_rect_raw","/camera/extrinsics/depth_to_color","/camera/motion_module/parameter_descriptions","/camera/motion_module/parameter_updates","/camera/realsense2_camera_manager/bond","/camera/rgb_camera/auto_exposure_roi/parameter_descriptions","/camera/rgb_camera/auto_exposure_roi/parameter_updates","/camera/rgb_camera/parameter_descriptions","/camera/rgb_camera/parameter_updates", "/camera/stereo_module/auto_exposure_roi/parameter_descriptions", "/camera/stereo_module/auto_exposure_roi/parameter_updates", "/camera/stereo_module/parameter_descriptions","/camera/stereo_module/parameter_updates"]' />
+		<!--    Format ["/camera", "/camera/color/camera_info", ...]      -->
+	</node>
+	<!-- <node name="listen_to_channels" type="listen_to_channels.py" pkg="rosbag_to_db" output="screen" args=""/> -->
+</launch>

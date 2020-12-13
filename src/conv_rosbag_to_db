@@ -1,0 +1,86 @@
+#! /usr/bin/env python
+
+"""
+#  * @file rosbag_to_db.py
+#  * @brief This file is used for extracting ROSBAGS and
+#  * writing the data to a SQLite3 Database
+#  * @authors Alex Sperka
+#  * @date 13.12.2020
+#  * */
+
+Formatted following http://www.artificialhumancompanions.com/structure-python-based-ros-package/
+"""
+import rospy
+from std_msgs.msg import String
+
+import sqlite3
+import pandas
+
+import rosbag_pandas
+
+def open_db_conn(path, conn):
+    try:
+        rospy.loginfo(rospy.get_caller_id()+"  Connecting to SQLite3 DB with path: %s  , table name is: %s", path_to_db, db_table)
+
+        conn = sqlite3.connect(path_to_db)
+        c = conn.cursor()
+        rospy.loginfo(rospy.get_caller_id()+"  Connected to SQLite3 DB successfully ")
+    except KeyError:
+        rospy.loginfo(rospy.get_caller_id()+"  Connection to DB failed  "+KeyError)
+    finally:
+        return conn  
+
+def conv_rb_to_df(rb_location, excluded_topics):
+    try:
+        rospy.loginfo(rospy.get_caller_id()+"  Convertion of ROSBAG to Pandas Dataframe: Start  ")
+
+#       df_rosbag = rosbag_pandas.bag_to_dataframe(path_to_rb, include=['/rosout', '/adma_data'])
+        df_rosbag = rosbag_pandas.bag_to_dataframe(rb_location, exclude=excluded_topics)
+        
+        rospy.loginfo(rospy.get_caller_id()+"  Convertion of ROSBAG to Pandas Dataframe: Done   ")
+    except KeyError:
+        rospy.loginfo(rospy.get_caller_id()+"  Convertion of ROSBAG to Pandas Dataframe: Failed   "+KeyError)
+    finally:
+        return df_rosbag
+        
+
+def df_to_sql(rosbag_df, db_table, conn):
+    try:
+        rospy.loginfo(rospy.get_caller_id()+"  Convertion of Pandas Dataframe to SQL: Start")
+
+        rosbag_df.to_sql(db_table, conn, if_exists='replace')
+    except KeyError:
+        rospy.loginfo(rospy.get_caller_id()+"  Convertion of Pandas Dataframe to SQL: Failed  "+KeyError)
+    finally:
+        rospy.loginfo(rospy.get_caller_id()+"  Convertion of Pandas Dataframe to SQL: Done   ")
+
+def conv_rosbag_to_db():
+    """ Converts a given ROSBAG file into a pandas dataframe and saves it into a SQLite3 DB Table 
+    input and paths: classified in the corresponding launch file
+    """
+
+    rospy.init_node('data_to_db')
+    rate = rospy.Rate(10)
+
+    try:
+        """ get parameters from launch file """
+        db_path = rospy.get_param('/conv_rosbag_to_db/db_path')
+        db_name = rospy.get_param('/conv_rosbag_to_db/db_name')
+        db_table = rospy.get_param('/conv_rosbag_to_db/db_table')
+        rb_path = rospy.get_param('/conv_rosbag_to_db/rb_path')
+        rb_name = rospy.get_param('/conv_rosbag_to_db/rb_name')
+        rb_excluded_topics = rospy.get_param('/conv_rosbag_to_db/rb_excluded_topics')
+    except KeyError:
+        rospy.loginfo(rospy.get_caller_id() + "Parameters in Launch file not set")
+
+    path_to_db = db_path+db_name
+    path_to_rb = rb_path+rb_name
+    rospy.loginfo(rospy.get_caller_id()+"  Path for ROSBAG: %s  ", path_to_rb)
+
+    conn = sqlite3.connect(path_to_db)
+    
+    df_rosbag = conv_rb_to_df(path_to_rb, rb_excluded_topics)
+    df_to_sql(df_rosbag, db_table, conn)
+
+if __name__ == '__main__':
+    conv_rosbag_to_db()
