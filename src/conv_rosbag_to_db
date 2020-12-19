@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
 """
 #  * @file rosbag_to_db.py
@@ -13,38 +13,88 @@ Formatted following http://www.artificialhumancompanions.com/structure-python-ba
 import rospy
 from std_msgs.msg import String
 
+import glob
+import os
 import sqlite3
-import pandas
+import pandas as pd
 
 import rosbag_pandas
+import bagpy
+from bagpy import bagreader
 
-def open_db_conn(path, conn):
+def open_db_conn(path):
+    """Connecting to SQLite database and returning a connection"""
     try:
-        rospy.loginfo(rospy.get_caller_id()+"  Connecting to SQLite3 DB with path: %s  , table name is: %s", path_to_db, db_table)
+        rospy.loginfo(rospy.get_caller_id()+"  Connecting to SQLite3 DB with path: %s ", path)
 
-        conn = sqlite3.connect(path_to_db)
+        conn = sqlite3.connect(path)
         c = conn.cursor()
         rospy.loginfo(rospy.get_caller_id()+"  Connected to SQLite3 DB successfully ")
+        return conn 
     except KeyError:
         rospy.loginfo(rospy.get_caller_id()+"  Connection to DB failed  "+KeyError)
-    finally:
-        return conn  
+         
 
-def conv_rb_to_df(rb_location, excluded_topics):
+def conv_rb_to_df(rb_path, rb_name, included_topics, excluded_topics=""):
+    """Converts either a given ROSBAG file (.bag) into a dataframe or
+    if no file is provided it finds the newest .bag file in the directory and converts it.
+    Using slower rosbag_pandas library vs bagpy in function conv_rb_to_csv"""  
     try:
+        if rb_name is "":
+            rb_name = get_latest_file(rb_path, '*.bag')
+            rospy.loginfo(rospy.get_caller_id()+"  No predefined ROSBAG in Launch file, latest ROSBAG in directory %s found with name: %s ", rb_path, rb_name)
+            
         rospy.loginfo(rospy.get_caller_id()+"  Convertion of ROSBAG to Pandas Dataframe: Start  ")
 
 #       df_rosbag = rosbag_pandas.bag_to_dataframe(path_to_rb, include=['/rosout', '/adma_data'])
-        df_rosbag = rosbag_pandas.bag_to_dataframe(rb_location, exclude=excluded_topics)
+        df_rosbag = rosbag_pandas.bag_to_dataframe(rb_path+rb_name, include=included_topics)
         
         rospy.loginfo(rospy.get_caller_id()+"  Convertion of ROSBAG to Pandas Dataframe: Done   ")
+        return df_rosbag
+    except KeyError:
+        rospy.loginfo(rospy.get_caller_id()+"  Convertion of ROSBAG to Pandas Dataframe: Failed   "+KeyError)
+        
+
+
+def conv_rb_to_csv(rb_path, rb_name, included_topics, excluded_topics=""):
+    """Converts either a given ROSBAG file (.bag) into a csv file or
+    if no file is provided it finds the newest .bag file in the directory and converts it.
+    Using faster bagpy library vs pandas_rosbag in function conv_rb_to_df"""    
+    csv_file=None
+    try:
+        if rb_name is "":
+            rb_name = get_latest_file(rb_path, '*.bag')
+            rospy.loginfo(rospy.get_caller_id()+"  No predefined ROSBAG in Launch file, latest ROSBAG in directory %s found with name: %s ", rb_path, rb_name)
+            
+        rospy.loginfo(rospy.get_caller_id()+"  Convertion of ROSBAG to Pandas Dataframe: Start  ")
+
+        df_rosbag = bagreader(rb_path+rb_name)
+        rospy.loginfo(rospy.get_caller_id()+"  ROSBAG Table: ")
+        rospy.loginfo(df_rosbag.topic_table)
+        
+        csv_file=df_rosbag.message_by_topic(topic=included_topics)      
+        
+        rospy.loginfo(rospy.get_caller_id()+"  Convertion of ROSBAG to Pandas Dataframe: Done   ")
+        return csv_file
     except KeyError:
         rospy.loginfo(rospy.get_caller_id()+"  Convertion of ROSBAG to Pandas Dataframe: Failed   "+KeyError)
     finally:
-        return df_rosbag
-        
+        return csv_file
+   
+
+def get_latest_file(path, *paths):
+    """Returns the name of the latest (most recent) file 
+    of the joined path(s)"""
+    fullpath = os.path.join(path, *paths)
+    list_of_files = glob.glob(fullpath)  # You may use iglob in Python3
+    if not list_of_files:                # I prefer using the negation
+        return None                      # because it behaves like a shortcut
+    latest_file = max(list_of_files, key=os.path.getctime)
+    _, filename = os.path.split(latest_file)
+    return filename
 
 def df_to_sql(rosbag_df, db_table, conn):
+    """Converts Dataframe to SQL database"""    
     try:
         rospy.loginfo(rospy.get_caller_id()+"  Convertion of Pandas Dataframe to SQL: Start")
 
@@ -53,6 +103,20 @@ def df_to_sql(rosbag_df, db_table, conn):
         rospy.loginfo(rospy.get_caller_id()+"  Convertion of Pandas Dataframe to SQL: Failed  "+KeyError)
     finally:
         rospy.loginfo(rospy.get_caller_id()+"  Convertion of Pandas Dataframe to SQL: Done   ")
+
+def csv_to_sql(rosbag_csv, db_table, conn):
+    """Converts CSV file to SQL database"""    
+    if rosbag_csv is not None:
+        try:
+            rospy.loginfo(rospy.get_caller_id()+"  Convertion of CSV Pandas Dataframe to SQL: Start")
+
+            rosbag_df=pd.read_csv(rosbag_csv)
+            rosbag_df.to_sql(db_table, conn, if_exists='replace')
+        except KeyError:
+            rospy.loginfo(rospy.get_caller_id()+"  Convertion of CSV Pandas Dataframe to SQL: Failed  "+KeyError)
+        finally:
+            rospy.loginfo(rospy.get_caller_id()+"  Convertion of CSV Pandas Dataframe to SQL: Done   ")
+
 
 def conv_rosbag_to_db():
     """ Converts a given ROSBAG file into a pandas dataframe and saves it into a SQLite3 DB Table 
@@ -69,6 +133,7 @@ def conv_rosbag_to_db():
         db_table = rospy.get_param('/conv_rosbag_to_db/db_table')
         rb_path = rospy.get_param('/conv_rosbag_to_db/rb_path')
         rb_name = rospy.get_param('/conv_rosbag_to_db/rb_name')
+        rb_included_topics = rospy.get_param('/conv_rosbag_to_db/rb_included_topics')
         rb_excluded_topics = rospy.get_param('/conv_rosbag_to_db/rb_excluded_topics')
     except KeyError:
         rospy.loginfo(rospy.get_caller_id() + "Parameters in Launch file not set")
@@ -77,10 +142,13 @@ def conv_rosbag_to_db():
     path_to_rb = rb_path+rb_name
     rospy.loginfo(rospy.get_caller_id()+"  Path for ROSBAG: %s  ", path_to_rb)
 
-    conn = sqlite3.connect(path_to_db)
+    conn = open_db_conn(path_to_db)
     
-    df_rosbag = conv_rb_to_df(path_to_rb, rb_excluded_topics)
-    df_to_sql(df_rosbag, db_table, conn)
+#   df_rosbag = conv_rb_to_df(rb_path=rb_path, included_topics=rb_included_topics, rb_name=rb_name)
+    csv_rosbag = conv_rb_to_csv(rb_path=rb_path, included_topics=rb_included_topics, rb_name=rb_name)
+    
+#   df_to_sql(df_rosbag, db_table, conn)
+    csv_to_sql(csv_rosbag, db_table, conn)
 
 if __name__ == '__main__':
     conv_rosbag_to_db()

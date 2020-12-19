@@ -13,7 +13,6 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   adma_connect
   rosbag_pandas
-  
 )
 
 set (LIB_DIR_LOCATION ${NAME}/lib) 
@@ -25,6 +24,9 @@ set (LIB_DIR_LOCATION ${NAME}/lib)
 find_library(Pandas NAMES pandas PATHS ${LIB_DIR_LOCATION}) 
 set(INCLUDE_DIRS ${NAME}/include)  
 
+set (LIB_DIR_LOCATION ${NAME}/lib) 
+find_library(Bagpy NAMES bagpy PATHS ${LIB_DIR_LOCATION}) 
+set(INCLUDE_DIRS ${NAME}/include)  
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
 
