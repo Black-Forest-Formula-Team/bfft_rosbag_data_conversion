@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(data_to_db)
+project(data_to_storage)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
@@ -11,7 +11,6 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
   std_msgs
-  adma_connect
   rosbag_pandas
 )
 
@@ -19,14 +18,13 @@ set (LIB_DIR_LOCATION ${NAME}/lib)
 find_library(SQLite3 NAMES sqlite3 PATHS ${LIB_DIR_LOCATION}) 
 set(INCLUDE_DIRS ${NAME}/include)  
 
-
 set (LIB_DIR_LOCATION ${NAME}/lib) 
 find_library(Pandas NAMES pandas PATHS ${LIB_DIR_LOCATION}) 
 set(INCLUDE_DIRS ${NAME}/include)  
 
 set (LIB_DIR_LOCATION ${NAME}/lib) 
 find_library(Bagpy NAMES bagpy PATHS ${LIB_DIR_LOCATION}) 
-set(INCLUDE_DIRS ${NAME}/include)  
+set(INCLUDE_DIRS ${NAME}/include)
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
 
@@ -61,11 +59,11 @@ catkin_python_setup()
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
 ## Generate messages in the 'msg' folder
-# add_message_files(
-#   FILES
+#add_message_files(DIRECTORY msg
+#  FILES
 #   Message1.msg
 #   Message2.msg
-# )
+#)
 
 ## Generate services in the 'srv' folder
 # add_service_files(
@@ -82,10 +80,10 @@ catkin_python_setup()
 # )
 
 ## Generate added messages and services with any dependencies listed here
-# generate_messages(
-#   DEPENDENCIES
-#   std_msgs
-# )
+generate_messages(
+  DEPENDENCIES
+  std_msgs
+)
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##

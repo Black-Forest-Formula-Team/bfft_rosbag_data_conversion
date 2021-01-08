@@ -1,6 +1,6 @@
 <launch>
 	<!-- start node -->
-	<node name="conv_rosbag_to_db" type="conv_rosbag_to_db" pkg="data_to_storage" output="screen" args="">
+	<node name="conv_rosbag_to_csv" type="conv_rosbag_to_csv" pkg="data_to_storage" output="screen" args="">
 		<param name="db_path" value="/SSD_512/sqlite3_DB/" />
 		<!--    Format '/SSD_512/sqlite3_DB/'     -->
 		<param name="db_name" value="bfft_sqlite3.db" />

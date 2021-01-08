@@ -1,0 +1,101 @@
+#! /usr/bin/env python3
+
+"""
+#  * @file rosbag_to_db.py
+#  * @brief This file is used for extracting ROSBAGS and
+#  * writing the data topicwise into CSV files.
+#  * Files are stored in same directory as ROSBAG under folder with same name 
+#  * @authors Alex Sperka
+#  * @date 08.01.2021
+#  * */
+
+Formatted following http://www.artificialhumancompanions.com/structure-python-based-ros-package/
+"""
+import rospy
+from std_msgs.msg import String
+
+import glob
+import os
+import sqlite3
+import pandas as pd
+
+import bagpy
+from bagpy import bagreader
+
+class ConvertRosbagToCSV():
+    ''' Wrapper for bagpy class, to convert only the given (or newest) ROSBAG topics into seperate CSV files
+    '''
+    def __init__(self):
+        super(ConvertRosbagToCSV, self).__init__()
+    
+    def convert(self, rb_path, rb_name, included_topics, excluded_topics=""):
+        """Converts either a given ROSBAG file (.bag) into a csv file or
+        if no file is provided it finds the newest .bag file in the directory and converts it.
+        Using faster bagpy library vs pandas_rosbag in function conv_rb_to_df"""    
+        csv_file=None
+        try:
+            if rb_name is "":
+                rb_name = self.__get_latest_file(rb_path, '*.bag')
+                rospy.loginfo(rospy.get_caller_id()+"  No predefined ROSBAG in Launch file, latest ROSBAG in directory %s found with name: %s ", rb_path, rb_name)
+                
+            rospy.loginfo(rospy.get_caller_id()+"  Convertion of ROSBAG topic "+str(included_topics)+" to Pandas Dataframe: Start  ")
+
+            df_rosbag = bagreader(rb_path+rb_name)
+            rospy.loginfo(rospy.get_caller_id()+"  ROSBAG Table: ")
+            rospy.loginfo(df_rosbag.topic_table)
+                    
+            csvfiles = []
+            for topics in included_topics:
+                data = df_rosbag.message_by_topic(topics)
+                print("included topics are: "+str(topics))
+                csvfiles.append(data)
+            csvfiles
+            
+            rospy.loginfo(rospy.get_caller_id()+"  Convertion of ROSBAG topic "+str(included_topics)+" to Pandas Dataframe: Done   ")
+            return csv_file
+        except KeyError:
+            rospy.loginfo(rospy.get_caller_id()+"  Convertion of ROSBAG topic "+str(included_topics)+" to Pandas Dataframe: Failed   "+KeyError)
+
+    def __get_latest_file(self, path, *paths):
+        """Returns the name of the latest (most recent) file 
+        of the joined path(s)"""
+        fullpath = os.path.join(path, *paths)
+        list_of_files = glob.glob(fullpath)
+        if not list_of_files:
+            return None
+        latest_file = max(list_of_files, key=os.path.getctime)
+        _, filename = os.path.split(latest_file)
+        return filename
+
+def conv_rosbag_to_csv():
+    """ Converts a given ROSBAG file into a pandas dataframe and saves every topic into a seperate CSV file in a folder with same name as ROSBAG file.
+    input and paths: classified in the corresponding launch file
+    """
+
+    rospy.init_node('data_to_csv', disable_signals=True)
+    rb_to_csv = ConvertRosbagToCSV()
+
+    try:
+        """ get parameters from launch file """
+        rb_path = rospy.get_param('/conv_rosbag_to_csv/rb_path')
+        rb_name = rospy.get_param('/conv_rosbag_to_csv/rb_name')
+        rb_included_topics = rospy.get_param('/conv_rosbag_to_csv/rb_included_topics')
+        rb_included_topics = rb_included_topics.split(",")
+        rb_excluded_topics = rospy.get_param('/conv_rosbag_to_csv/rb_excluded_topics')
+        
+        rospy.loginfo(rospy.get_caller_id()+"  Path for ROSBAG: %s  ", rb_path+rb_name)
+    
+        csv_rosbag = rb_to_csv.convert(rb_path=rb_path, included_topics=rb_included_topics, rb_name=rb_name)
+
+    except KeyError:
+        rospy.loginfo(rospy.get_caller_id() + "Parameters in Launch file not set")
+
+    finally:
+        rospy.signal_shutdown("Process finished successfully")
+
+if __name__ == '__main__':
+    try:
+        conv_rosbag_to_csv()
+
+    except rospy.ROSInterruptException:
+        pass
