@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(data_to_storage)
+project(bfft_data_conversion)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
@@ -16,6 +16,9 @@ find_package(catkin REQUIRED COMPONENTS
 
 set (LIB_DIR_LOCATION ${NAME}/lib) 
 find_library(SQLite3 NAMES sqlite3 PATHS ${LIB_DIR_LOCATION}) 
+
+
+
 set(INCLUDE_DIRS ${NAME}/include)  
 
 set (LIB_DIR_LOCATION ${NAME}/lib) 

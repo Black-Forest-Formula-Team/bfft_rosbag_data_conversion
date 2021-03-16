@@ -85,7 +85,7 @@ def conv_rosbag_to_csv():
         
         rospy.loginfo(rospy.get_caller_id()+"  Path for ROSBAG: %s  ", rb_path+rb_name)
     
-        csv_rosbag = rb_to_csv.convert(rb_path=rb_path, included_topics=rb_included_topics, rb_name=rb_name)
+        csvs_rosbag = rb_to_csv.convert(rb_path=rb_path, included_topics=rb_included_topics, rb_name=rb_name)
 
     except KeyError:
         rospy.loginfo(rospy.get_caller_id() + "Parameters in Launch file not set")
