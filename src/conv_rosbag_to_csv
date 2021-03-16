@@ -1,22 +1,20 @@
 #! /usr/bin/env python3
 
 """
-#  * @file rosbag_to_db.py
+#  * @file conv_rosbag_to_csv.py
 #  * @brief This file is used for extracting ROSBAGS and
 #  * writing the data topicwise into CSV files.
 #  * Files are stored in same directory as ROSBAG under folder with same name 
 #  * @authors Alex Sperka
-#  * @date 08.01.2021
+#  * @date 16.03.2021
 #  * */
-
-Formatted following http://www.artificialhumancompanions.com/structure-python-based-ros-package/
 """
+
 import rospy
 from std_msgs.msg import String
 
 import glob
 import os
-import sqlite3
 import pandas as pd
 
 import bagpy

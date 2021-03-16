@@ -1,12 +1,6 @@
 <launch>
 	<!-- start node -->
 	<node name="conv_rosbag_to_csv" type="conv_rosbag_to_csv" pkg="bfft_data_conversion" output="screen" args="">
-		<param name="db_path" value="/SSD_512/sqlite3_DB/" />
-		<!--    Format '/SSD_512/sqlite3_DB/'     -->
-		<param name="db_name" value="bfft_sqlite3.db" />
-		<!--    Format 'bfft_sqlite3.db'      -->
-		<param name="db_table" value="adma_test" />
-		<!--    Format 'adma_test'      -->
 		<param name="rb_path" value="/SSD_512/bagfiles/" />
 		<!--    Format '/SSD_512/bagfiles/'       -->
 		<param name="rb_name" value="" />
