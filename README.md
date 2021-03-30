@@ -42,7 +42,7 @@ We are developing this package for the autonomous infrastructure of our first el
 
 ____________________
 ## Hardware & Software Preconditions
-We are using a NVIDIA Jetson AGX Xavier for our system. More input on or hardware setup you can find in the [Wiki](https://github.com/Black-Forest-Formula-Team/bfft_formula-student_driverless/wiki/01-Setup-of-NVIDIA-Jetson-AGX-Xavier) of our main repository. This package depends less on the hardware setup as more on the following software.
+We are using a NVIDIA Jetson AGX Xavier for our system. More input on or hardware setup you can find in the [Wiki](https://github.com/Black-Forest-Formula-Team/bfft_formula-student_driverless/wiki/01.0-Setup-of-NVIDIA-Jetson-AGX-Xavier) of our main repository. This package depends less on the hardware setup as more on the following software.
 
 ### Software Stack
 * Ubuntu 18.04 LTS
@@ -51,13 +51,13 @@ We are using a NVIDIA Jetson AGX Xavier for our system. More input on or hardwar
 * JetPack 4.4
 ____________________
 ## Setup
-For our Hardware and Software setup please visit the page [Setup of NVIDIA Jetson AGX Xavier](https://github.com/Black-Forest-Formula-Team/bfft_formula-student_driverless/wiki/01-Setup-of-NVIDIA-Jetson-AGX-Xavier) in our Wiki. There you will find a guide how to install ROS Melodic, relevant drivers and libraries. You can also find a guide there how to enable CAN on the NVIDIA Jetson Board and how to wire it to a CAN sensor using a CAN-transceiver.
+For our Hardware and Software setup please visit the page [Setup of NVIDIA Jetson AGX Xavier](https://github.com/Black-Forest-Formula-Team/bfft_formula-student_driverless/wiki/01.0-Setup-of-NVIDIA-Jetson-AGX-Xavier) in our Wiki. There you will find a guide how to install ROS Melodic, relevant drivers and libraries. You can also find a guide there how to enable CAN on the NVIDIA Jetson Board and how to wire it to a CAN sensor using a CAN-transceiver.
 ____________________
 ## Getting started
 Assuming you are used to ROS1, have your hardware wired and/or followed the Wiki pages mentioned above you should now be able to clone this package into your catkin workspace (we assume it lays under ```cd ~/catkin_ws/```, you might have to adjust this to your needs). 
 
 ### Clone packages
-To do so clone this package into your workspace and make sure you installed the necessary libaries ([Link to Wiki](https://github.com/Black-Forest-Formula-Team/bfft_formula-student_driverless/wiki/01-Installation-Libraries-for-Workspace-(Python-and-ROS))).
+To do so clone this package into your workspace and make sure you installed the necessary libaries ([Link to Wiki](https://github.com/Black-Forest-Formula-Team/bfft_formula-student_driverless/wiki/01.2-Installation-Libraries-for-Workspace-(Python-and-ROS))).
 
 
 * [bfft_rosbag_data_conversion](https://github.com/Black-Forest-Formula-Team/bfft_rosbag_data_conversion): Take data recorded in [ROSBAGS](https://wiki.ros.org/rosbag) (internal data format) and export it into CSV files (one per topic). Use CSV files for data visualization purpose
@@ -107,7 +107,7 @@ This process is displayed in the gif below.
 
 ________________________________
 ## Code Repository Conventions
-For our coding conventions please visit the wiki page [ROS & Python Conventions](https://github.com/Black-Forest-Formula-Team/bfft_formula-student_driverless/wiki/00-Coding-Conventions)!
+For our coding conventions please visit the wiki page [ROS & Python Conventions](https://github.com/Black-Forest-Formula-Team/bfft_formula-student_driverless/wiki/00.4-Coding-Conventions)!
 
 ____________________
 ## Feedback
